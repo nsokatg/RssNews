@@ -260,7 +260,7 @@ async function loadWeather(){
         data.hourly.temperature_2m[idx+i];
 
         out+=
-        `${h}時 ${temp}℃ ${weatherText(data.hourly.weathercode[idx+i])}<br>`;
+        `${h}时 ${temp}℃ ${weatherText(data.hourly.weathercode[idx+i])}<br>`;
 
         tempSeries.push(temp);
     }
@@ -345,9 +345,10 @@ const feeds=[
 ];
 
 async function fetchRSSasJSON(url){
-
+    // キャッシュを回避するために現在時刻のミリ秒をクエリパラメータ(_t)として付与
+    const cacheBuster = "_t=" + new Date().getTime();
     const api=
-    "https://api.rss2json.com/v1/api.json?rss_url="
+    "https://api.rss2json.com/v1/api.json?" + cacheBuster + "&rss_url="
     + encodeURIComponent(url);
 
     const res=await fetch(api);
