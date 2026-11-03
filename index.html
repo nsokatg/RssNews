@@ -15,11 +15,12 @@ body{
     line-height:1.5;
 }
 
-/* ★ 70%幅前提 */
+/* ★ 単独表示用に最大幅を設定し、広がりすぎを防止 */
 .container{
-    width:70%;
+    width:92%;
+    max-width:1200px;
     margin:0 auto;
-    padding:14px;
+    padding:16px;
     box-sizing:border-box;
 }
 
@@ -27,9 +28,9 @@ body{
 header{
     background:#003366;
     color:white;
-    height:40px;
-    line-height:40px;
-    padding:0 12px;
+    height:45px;
+    line-height:45px;
+    padding:0 16px;
     border-radius:8px;
     font-size:20px;
     font-weight:bold;
@@ -42,7 +43,7 @@ header{
 .controls{
     display:flex;
     gap:8px;
-    margin-bottom:10px;
+    margin-bottom:12px;
 }
 
 select,
@@ -51,7 +52,7 @@ button{
 }
 
 select{
-    padding:6px 10px;
+    padding:6px 12px;
     border:1px solid #ccc;
     border-radius:6px;
     background:white;
@@ -62,7 +63,7 @@ button{
     color:white;
     border:none;
     border-radius:6px;
-    padding:6px 12px;
+    padding:6px 14px;
     cursor:pointer;
 }
 
@@ -73,14 +74,14 @@ button:hover{
 /* 天気3カラム */
 .weather-layout{
     display:flex;
-    gap:10px;
-    margin-bottom:10px;
+    gap:12px;
+    margin-bottom:12px;
 }
 
 .box{
     flex:1;
     background:white;
-    padding:12px;
+    padding:14px;
     border-radius:6px;
     box-shadow:0 2px 4px rgba(0,0,0,0.1);
     border-left:5px solid #005bac;
@@ -92,26 +93,31 @@ canvas{
     height:140px;
 }
 
-/* ニュース */
+/* ニュースエリア：広い画面を活かして2列のグリッドレイアウトに変更 */
 .news-area{
-    height:calc(100vh - 300px);
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    gap:12px;
+    max-height:calc(100vh - 280px);
     overflow-y:auto;
+    padding-right:4px;
 }
 
 .category{
     background:white;
-    margin-bottom:10px;
     border-radius:6px;
     overflow:hidden;
     box-shadow:0 2px 4px rgba(0,0,0,0.1);
+    height:fit-content;
 }
 
 .category-header{
     background:#005bac;
     color:white;
-    padding:3px 12px;
+    padding:6px 14px;
     display:flex;
     justify-content:space-between;
+    align-items:center;
     cursor:pointer;
     font-size:15px;
     font-weight:bold;
@@ -129,7 +135,7 @@ canvas{
 
 .news-body{
     display:none;
-    padding:8px;
+    padding:10px 14px;
 }
 
 .news-item{
@@ -145,6 +151,7 @@ canvas{
     color:#005bac;
     text-decoration:none;
     font-weight:bold;
+    font-size:14px;
 }
 
 .news-link:hover{
@@ -260,7 +267,7 @@ async function loadWeather(){
         data.hourly.temperature_2m[idx+i];
 
         out+=
-        `${h}时 ${temp}℃ ${weatherText(data.hourly.weathercode[idx+i])}<br>`;
+        `${h}時 ${temp}℃ ${weatherText(data.hourly.weathercode[idx+i])}<br>`;
 
         tempSeries.push(temp);
     }
@@ -345,7 +352,6 @@ const feeds=[
 ];
 
 async function fetchRSSasJSON(url){
-    // キャッシュを回避するために現在時刻のミリ秒をクエリパラメータ(_t)として付与
     const cacheBuster = "_t=" + new Date().getTime();
     const api=
     "https://api.rss2json.com/v1/api.json?" + cacheBuster + "&rss_url="
