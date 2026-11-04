@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>天気とニュース</title>
+<title>ニュース一覧</title>
 
 <style>
 
@@ -46,16 +46,8 @@ header{
     margin-bottom:12px;
 }
 
-select,
 button{
     font-size:14px;
-}
-
-select{
-    padding:6px 12px;
-    border:1px solid #ccc;
-    border-radius:6px;
-    background:white;
 }
 
 button{
@@ -71,34 +63,12 @@ button:hover{
     opacity:0.9;
 }
 
-/* 天気3カラム */
-.weather-layout{
-    display:flex;
-    gap:12px;
-    margin-bottom:12px;
-}
-
-.box{
-    flex:1;
-    background:white;
-    padding:14px;
-    border-radius:6px;
-    box-shadow:0 2px 4px rgba(0,0,0,0.1);
-    border-left:5px solid #005bac;
-}
-
-/* グラフ */
-canvas{
-    width:100%;
-    height:140px;
-}
-
 /* ニュースエリア：広い画面を活かして2列のグリッドレイアウトに変更 */
 .news-area{
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
     gap:12px;
-    max-height:calc(100vh - 280px);
+    max-height:calc(100vh - 150px);
     overflow-y:auto;
     padding-right:4px;
 }
@@ -165,39 +135,10 @@ canvas{
 
 <div class="container">
 
-<header>天気とニュース</header>
+<header>ニュース一覧</header>
 
 <div class="controls">
-
-<select id="city">
-    <option value="33.5902,130.4017" selected>福岡</option>
-    <option value="35.6895,139.6917">東京</option>
-    <option value="34.6937,135.5023">大阪</option>
-    <option value="43.0642,141.3469">札幌</option>
-</select>
-
 <button onclick="loadAll()">更新</button>
-
-</div>
-
-<!-- 天気 -->
-<div class="weather-layout">
-
-<div class="box">
-    <div><b>現在</b></div>
-    <div id="nowWeather">--</div>
-</div>
-
-<div class="box">
-    <div><b>6時間</b></div>
-    <div id="forecastWeather">--</div>
-</div>
-
-<div class="box">
-    <div><b>グラフ</b></div>
-    <canvas id="tempChart"></canvas>
-</div>
-
 </div>
 
 <!-- ニュース -->
@@ -206,128 +147,6 @@ canvas{
 </div>
 
 <script>
-
-/* =========================
-   天気
-========================= */
-
-function weatherText(code){
-
-    const map={
-        0:"快晴",
-        1:"晴れ",
-        2:"薄曇り",
-        3:"曇り",
-        45:"霧",
-        51:"小雨",
-        61:"雨",
-        80:"にわか雨",
-        95:"雷雨"
-    };
-
-    return map[code] || "不明";
-}
-
-let tempSeries=[];
-
-async function loadWeather(){
-
-    const [lat,lon]=
-    document.getElementById("city").value.split(",");
-
-    const url=
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weathercode&timezone=Asia%2FTokyo`;
-
-    const res=await fetch(url);
-    const data=await res.json();
-
-    const now=new Date();
-    now.setMinutes(0,0,0);
-
-    const idx=
-    data.hourly.time.findIndex(
-        t=>new Date(t)>=now
-    );
-
-    document.getElementById("nowWeather").innerHTML=
-    `<b>${data.hourly.temperature_2m[idx]}℃</b> / ${weatherText(data.hourly.weathercode[idx])}`;
-
-    let out="";
-    tempSeries=[];
-
-    for(let i=1;i<=6;i++){
-
-        const t=data.hourly.time[idx+i];
-
-        if(!t) break;
-
-        const h=parseInt(t.slice(11,13),10);
-
-        const temp=
-        data.hourly.temperature_2m[idx+i];
-
-        out+=
-        `${h}時 ${temp}℃ ${weatherText(data.hourly.weathercode[idx+i])}<br>`;
-
-        tempSeries.push(temp);
-    }
-
-    document.getElementById("forecastWeather").innerHTML=out;
-
-    drawGraph();
-}
-
-/* =========================
-   グラフ
-========================= */
-
-function drawGraph(){
-
-    const canvas=
-    document.getElementById("tempChart");
-
-    const ctx=canvas.getContext("2d");
-
-    canvas.width=canvas.offsetWidth;
-    canvas.height=140;
-
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    if(tempSeries.length===0) return;
-
-    const padding=20;
-
-    const min=Math.min(...tempSeries);
-    const max=Math.max(...tempSeries);
-
-    const stepX=
-    (canvas.width-padding*2)/(tempSeries.length-1);
-
-    ctx.beginPath();
-    ctx.strokeStyle="#005bac";
-    ctx.lineWidth=2;
-
-    tempSeries.forEach((temp,i)=>{
-
-        const x=padding+i*stepX;
-
-        const y=
-        canvas.height-padding-
-        ((temp-min)/(max-min||1))*
-        (canvas.height-padding*2);
-
-        if(i===0){
-            ctx.moveTo(x,y);
-        }else{
-            ctx.lineTo(x,y);
-        }
-
-        ctx.fillStyle="#005bac";
-        ctx.fillText(temp+"℃",x-10,y-8);
-    });
-
-    ctx.stroke();
-}
 
 /* =========================
    RSSニュース
@@ -439,8 +258,6 @@ async function loadNews(){
 }
 
 async function loadAll(){
-
-    await loadWeather();
     await loadNews();
 }
 
